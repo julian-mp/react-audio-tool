@@ -1,0 +1,13 @@
+.react-audio-tool {
+  background: red;
+  box-sizing: border-box;
+  padding: 5px;
+  width: auto;
+}
+
+.react-audio-tool .audio-block {
+  background: blue;
+  margin: 5px;
+  overflow: hidden;
+  width: 100%;
+}
