@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Rnd } from 'react-rnd'
+import { Rnd, RndDragCallback, RndResizeCallback } from 'react-rnd'
 import { Buffer, Player, ToneAudioBuffer } from 'tone'
 import Waveform from 'waveform-react'
 
@@ -12,11 +12,19 @@ export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
   const [player, setPlayer] = useState<Player>()
   const [buffer, setBuffer] = useState<AudioBuffer>()
   const [toneBuffer, setToneBuffer] = useState<ToneAudioBuffer>()
+  const [offsetStart, setOffsetStart] = useState<number>(0)
+  const [offsetEnd, setOffsetEnd] = useState<number>(0)
+  const [lastOffsetStart, setLastOffsetStart] = useState<number>(0)
+  const [lastOffsetEnd, setLastOffsetEnd] = useState<number>(0)
+  const [startAt, setStartAt] = useState<number>(0)
+
+  const playDuration = buffer
+    ? buffer.duration + lastOffsetEnd + lastOffsetStart
+    : 0
 
   useEffect(() => {
     const tonePlayer = new Player(audioFileUrl).toDestination()
     const toneBuffer = new Buffer(audioFileUrl, (buffer) => {
-      console.log(buffer.get(), 'bufferget')
       setBuffer(buffer.toMono(1).get())
     })
 
@@ -24,53 +32,103 @@ export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
     setToneBuffer(toneBuffer)
   }, [])
 
-  useEffect(() => {
-    console.log('player >>>', player)
+  function convertSecondsToPixels(seconds: number) {
+    return seconds * 50
+  }
 
-    player && console.log(player.state)
-  }, [player])
+  function convertPixelsToSeconds(pixels: number) {
+    return pixels / 50
+  }
 
   function togglePlay() {
     if (!player) return
+    console.log('playDuration >>>', playDuration)
+    console.log('startAt >>>', startAt)
 
-    if (player.state === 'stopped') {
-      player.start()
-    } else {
-      player?.stop()
+    return player.state === 'stopped'
+      ? player.start(
+          Math.round(startAt),
+          Math.abs(lastOffsetStart),
+          playDuration
+        )
+      : player.stop()
+  }
+
+  const handleResize: RndResizeCallback = (e, direction, ref, delta) => {
+    if (direction === 'left') {
+      setOffsetStart(lastOffsetStart + convertPixelsToSeconds(delta.width))
+    }
+
+    if (direction === 'right') {
+      setOffsetEnd(lastOffsetEnd + convertPixelsToSeconds(delta.width))
     }
   }
 
+  const handleResizeStop: RndResizeCallback = (
+    e,
+    direction,
+    ref,
+    delta,
+    position
+  ) => {
+    if (direction === 'left') {
+      setLastOffsetStart(lastOffsetStart + convertPixelsToSeconds(delta.width))
+      setStartAt(convertPixelsToSeconds(position.x))
+    }
+
+    if (direction === 'right') {
+      setLastOffsetEnd(lastOffsetEnd + convertPixelsToSeconds(delta.width))
+    }
+  }
+
+  const handleDragStop: RndDragCallback = (e, data) => {
+    setStartAt(convertPixelsToSeconds(data.x))
+  }
+
   return player ? (
-    <Rnd
-      width={`${toneBuffer && toneBuffer!.duration * 50}px`}
-      height="100px"
-      dragAxis="x"
-    >
-      <div
-        className="audio-block"
-        onClick={togglePlay}
-        // style={{ width: `${toneBuffer && toneBuffer.duration * 50}px` }}
-      >
-        <Waveform
-          buffer={buffer}
-          height={100}
-          width={toneBuffer && toneBuffer.duration * 50}
-          class="hello-world"
-          position={0}
-          color="#676767"
-          plot="line"
-          markerStyle={{
-            color: '#fff',
-            width: 4,
-          }}
-          waveStyle={{
-            animate: true,
-            color: '#000',
-            pointWidth: 1,
-          }}
-        />
+    <div style={{ display: 'flex' }}>
+      <button onClick={() => togglePlay()}>▶️</button>
+      <div className="audio-block">
+        <Rnd
+          width={`${
+            toneBuffer && convertSecondsToPixels(toneBuffer!.duration)
+          }px`}
+          className="waveform-container"
+          height="100px"
+          bounds=".audio-block"
+          dragAxis="x"
+          onResize={handleResize}
+          onResizeStop={handleResizeStop}
+          onDragStop={handleDragStop}
+          enableResizing={{ left: true, right: true }}
+        >
+          <div
+            style={{
+              transform: `translateX(${convertSecondsToPixels(offsetStart)}px)`,
+            }}
+          >
+            <Waveform
+              buffer={buffer}
+              height={100}
+              width={toneBuffer && convertSecondsToPixels(toneBuffer.duration)}
+              className="react-waveform"
+              position={0}
+              color="#676767"
+              plot="line"
+              markerStyle={{
+                color: '#fff',
+                width: 4,
+              }}
+              waveStyle={{
+                animate: true,
+                color: '#000',
+                pointWidth: 1,
+              }}
+            />
+          </div>
+        </Rnd>
       </div>
-    </Rnd>
+    </div>
   ) : (
     <></>
   )

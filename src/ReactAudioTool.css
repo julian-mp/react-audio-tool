@@ -6,8 +6,18 @@
 }
 
 .react-audio-tool .audio-block {
-  background: blue;
+  background: lightgray;
   margin: 5px;
+  width: calc(100% - 10px);
+  height: 100px;
+  position: relative;
+}
+
+.react-audio-tool .audio-block .waveform-container {
+  background: blue;
   overflow: hidden;
-  width: 100%;
+}
+
+.react-audio-tool .audio-block .waveform-container canvas {
+  transform: inherit;
 }
