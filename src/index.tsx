@@ -9,8 +9,14 @@ ReactDOM.render(
     <ReactAudioTool
       width="500px"
       audioFileUrls={[
-        'https://public-test-audio.s3-eu-west-1.amazonaws.com/Kitkat_15sec.wav',
-        'https://public-test-audio.s3-eu-west-1.amazonaws.com/test_backing_track_preview.mp3',
+        [
+          'kitkat',
+          'https://public-test-audio.s3-eu-west-1.amazonaws.com/Kitkat_15sec.wav',
+        ],
+        [
+          'backingtrack',
+          'https://public-test-audio.s3-eu-west-1.amazonaws.com/test_backing_track_preview.mp3',
+        ],
       ]}
     />
   </React.StrictMode>,

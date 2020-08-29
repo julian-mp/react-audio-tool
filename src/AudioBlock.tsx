@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Rnd, RndDragCallback, RndResizeCallback } from 'react-rnd'
 import { Buffer, Player, ToneAudioBuffer } from 'tone'
 import Waveform from 'waveform-react'
+import { convertPixelsToSeconds, convertSecondsToPixels } from './utils'
 
 interface IProps {
   audioFileUrl: string
@@ -31,14 +32,6 @@ export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
     setPlayer(tonePlayer)
     setToneBuffer(toneBuffer)
   }, [])
-
-  function convertSecondsToPixels(seconds: number) {
-    return seconds * 50
-  }
-
-  function convertPixelsToSeconds(pixels: number) {
-    return pixels / 50
-  }
 
   function togglePlay() {
     if (!player) return
@@ -87,7 +80,7 @@ export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
 
   return player ? (
     <div style={{ display: 'flex' }}>
-      <button onClick={() => togglePlay()}>▶️</button>
+      <button onClick={() => togglePlay()}>{children}</button>
       <div className="audio-block">
         <Rnd
           width={`${

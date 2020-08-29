@@ -4,5 +4,6 @@
 
 ### TODO
 
-1. Try using Tone.Players on the main component and passing a player or buffer to the child components
-   1. This will make it easier to play tracks together
+1. Add playersState object on the root and pass down / update handlers down to individual players
+   1. Use this to trigger the play all so that it'll play correctly in play all mode
+2. Add fade in/fade out
