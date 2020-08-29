@@ -80,8 +80,11 @@ export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
 
   return player ? (
     <div style={{ display: 'flex' }}>
-      <button onClick={() => togglePlay()}>{children}</button>
+      <button onClick={() => togglePlay()}>
+        {player.state === 'stopped' ? `Play` : `Stop`}
+      </button>
       <div className="audio-block">
+        <div className="label">{children}</div>
         <Rnd
           width={`${
             toneBuffer && convertSecondsToPixels(toneBuffer!.duration)

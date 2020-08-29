@@ -13,6 +13,16 @@
   position: relative;
 }
 
+.react-audio-tool .audio-block .label {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background: black;
+  color: white;
+  padding: 5px;
+  z-index: 100;
+}
+
 .react-audio-tool .audio-block .waveform-container {
   background: blue;
   overflow: hidden;
