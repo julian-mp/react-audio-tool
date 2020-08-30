@@ -6,10 +6,19 @@ import { convertPixelsToSeconds, convertSecondsToPixels } from './utils'
 
 interface IProps {
   audioFileUrl: string
+  playerName: string
+  updatePlayerState: any
   children?: any
+  seconds: any
 }
 
-export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
+export const AudioBlock: React.FC<IProps> = ({
+  audioFileUrl,
+  playerName,
+  updatePlayerState,
+  children,
+  seconds,
+}) => {
   const [player, setPlayer] = useState<Player>()
   const [buffer, setBuffer] = useState<AudioBuffer>()
   const [toneBuffer, setToneBuffer] = useState<ToneAudioBuffer>()
@@ -19,7 +28,7 @@ export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
   const [lastOffsetEnd, setLastOffsetEnd] = useState<number>(0)
   const [startAt, setStartAt] = useState<number>(0)
 
-  const playDuration = buffer
+  const duration = buffer
     ? buffer.duration + lastOffsetEnd + lastOffsetStart
     : 0
 
@@ -33,17 +42,21 @@ export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
     setToneBuffer(toneBuffer)
   }, [])
 
+  useEffect(() => {
+    updatePlayerState(playerName, {
+      startAt,
+      offsetStart: Math.abs(lastOffsetStart),
+      duration,
+    })
+  }, [startAt, lastOffsetStart, duration])
+
   function togglePlay() {
     if (!player) return
-    console.log('playDuration >>>', playDuration)
+    console.log('duration >>>', duration)
     console.log('startAt >>>', startAt)
 
     return player.state === 'stopped'
-      ? player.start(
-          Math.round(startAt),
-          Math.abs(lastOffsetStart),
-          playDuration
-        )
+      ? player.start(Math.round(startAt), Math.abs(lastOffsetStart), duration)
       : player.stop()
   }
 
@@ -80,11 +93,11 @@ export const AudioBlock: React.FC<IProps> = ({ audioFileUrl, children }) => {
 
   return player ? (
     <div style={{ display: 'flex' }}>
-      <button onClick={() => togglePlay()}>
+      <button disabled={!player.loaded} onClick={() => togglePlay()}>
         {player.state === 'stopped' ? `Play` : `Stop`}
       </button>
       <div className="audio-block">
-        <div className="label">{children}</div>
+        <div className="label">{children + seconds}</div>
         <Rnd
           width={`${
             toneBuffer && convertSecondsToPixels(toneBuffer!.duration)

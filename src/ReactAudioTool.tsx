@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Players, ToneAudioBuffers, Transport } from 'tone'
+import { Players, Transport } from 'tone'
 import { AudioBlock } from './AudioBlock'
 import './ReactAudioTool.css'
 
@@ -9,19 +9,15 @@ interface IProps {
 }
 
 interface IPlayerState {
-  startAt?: number
-  duration?: number
-  offsetStart?: number
+  startAt: number
+  duration: number
+  offsetStart: number
   offsetEnd?: number
 }
 
-const defaultPlayerState = {
-  startAt: 0,
-  offsetStart: 0,
-  offsertEnd: 0,
-}
-
 export const ReactAudioTool: React.FC<IProps> = ({ audioFileUrls }) => {
+  const [isPlaying, setIsPlaying] = useState<boolean>(false)
+  const [isLoaded, setIsLoaded] = useState<boolean>(false)
   const [playerStates, setPlayerStates] = useState<
     Record<string, IPlayerState>
   >()
@@ -34,37 +30,41 @@ export const ReactAudioTool: React.FC<IProps> = ({ audioFileUrls }) => {
   }
 
   const audioFilesConfig = Object.fromEntries(new Map(audioFileUrls))
-  const players = new Players(audioFilesConfig).toDestination()
-
-  const buffers = new ToneAudioBuffers(audioFilesConfig, () => {
-    const allBuffers = audioFileUrls.map(([audioName]) =>
-      buffers.get(audioName).toMono(0).toArray()
-    )
-  })
+  const players: Players = new Players(audioFilesConfig, () =>
+    setIsLoaded(true)
+  ).toDestination()
 
   function togglePlayAll() {
-    if (Transport.state === 'stopped') {
-      Transport.scheduleOnce(
-        (time) =>
-          audioFileUrls.map(([audioName]) =>
-            players.player(audioName).start(time)
-          ),
-        0
-      )
-      Transport.start()
-    } else if (Transport.state === 'started') {
-      Transport.stop()
-    }
+    setIsPlaying(!isPlaying)
+
+    audioFileUrls.map(([audioName]) => {
+      const player = players.player(audioName)
+      const playerState = playerStates![audioName]
+
+      const startAt = playerState.startAt
+      const offsetStart = playerState.offsetStart
+      const duration = playerState.duration
+
+      player.start(startAt, offsetStart, duration)
+    })
   }
 
   return (
     <div className="react-audio-tool">
       {audioFileUrls.map(([audioName, audioFileUrl]) => (
-        <AudioBlock key={audioName} audioFileUrl={audioFileUrl}>
+        <AudioBlock
+          key={audioName}
+          playerName={audioName}
+          audioFileUrl={audioFileUrl}
+          updatePlayerState={updatePlayerState}
+          seconds={Transport.seconds}
+        >
           {audioName}
         </AudioBlock>
       ))}
-      <button onClick={togglePlayAll}>Play All</button>
+      <button disabled={!isLoaded} onClick={togglePlayAll}>
+        Play All
+      </button>
     </div>
   )
 }
