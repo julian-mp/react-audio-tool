@@ -4,7 +4,7 @@
 
 ### TODO
 
-1. Fix startAt master
+1. Fix startAt master + fix stopAll/playAll toggle
 2. Add fade in/fade out
 3. Add download
 4. Add grid on bottom with time
