@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { Players, Transport } from 'tone'
 import { AudioBlock } from './AudioBlock'
-import './ReactAudioTool.css'
+import '../styles/ReactAudioTool.css'
+import { Button } from './Button'
 
 interface IProps {
-  width?: string
   audioFileUrls: [string, string][]
 }
 
@@ -45,7 +45,7 @@ export const ReactAudioTool: React.FC<IProps> = ({ audioFileUrls }) => {
       const offsetStart = playerState.offsetStart
       const duration = playerState.duration
 
-      player.start(startAt, offsetStart, duration)
+      return player.start(startAt, offsetStart, duration)
     })
   }
 
@@ -62,9 +62,9 @@ export const ReactAudioTool: React.FC<IProps> = ({ audioFileUrls }) => {
           {audioName}
         </AudioBlock>
       ))}
-      <button disabled={!isLoaded} onClick={togglePlayAll}>
+      <Button disabled={!isLoaded} onClick={togglePlayAll}>
         Play All
-      </button>
+      </Button>
     </div>
   )
 }

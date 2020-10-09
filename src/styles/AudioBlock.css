@@ -1,0 +1,30 @@
+.audio-block-container {
+  display: flex;
+}
+
+.audio-block {
+  background: #d3f6db;
+  margin: 5px;
+  width: calc(100% - 10px);
+  height: 100px;
+  position: relative;
+}
+
+.audio-block .label {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background: black;
+  color: white;
+  padding: 5px;
+  z-index: 100;
+}
+
+.audio-block .waveform-container {
+  background: #0b7a75;
+  overflow: hidden;
+}
+
+.audio-block .waveform-container canvas {
+  transform: inherit;
+}

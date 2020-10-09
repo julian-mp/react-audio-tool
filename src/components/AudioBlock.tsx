@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Rnd, RndDragCallback, RndResizeCallback } from 'react-rnd'
 import { Buffer, Player, ToneAudioBuffer } from 'tone'
 import Waveform from 'waveform-react'
-import { convertPixelsToSeconds, convertSecondsToPixels } from './utils'
+import { convertPixelsToSeconds, convertSecondsToPixels } from '../utils'
+import { Button } from './Button'
+import '../styles/AudioBlock.css'
 
 interface IProps {
   audioFileUrl: string
@@ -17,13 +19,12 @@ export const AudioBlock: React.FC<IProps> = ({
   playerName,
   updatePlayerState,
   children,
-  seconds,
 }) => {
   const [player, setPlayer] = useState<Player>()
   const [buffer, setBuffer] = useState<AudioBuffer>()
   const [toneBuffer, setToneBuffer] = useState<ToneAudioBuffer>()
   const [offsetStart, setOffsetStart] = useState<number>(0)
-  const [offsetEnd, setOffsetEnd] = useState<number>(0)
+  const [, setOffsetEnd] = useState<number>(0)
   const [lastOffsetStart, setLastOffsetStart] = useState<number>(0)
   const [lastOffsetEnd, setLastOffsetEnd] = useState<number>(0)
   const [startAt, setStartAt] = useState<number>(0)
@@ -31,6 +32,14 @@ export const AudioBlock: React.FC<IProps> = ({
   const duration = buffer
     ? buffer.duration + lastOffsetEnd + lastOffsetStart
     : 0
+
+  const memoizedUpdatePlayerState = useCallback(() => {
+    updatePlayerState(playerName, {
+      startAt,
+      offsetStart: Math.abs(lastOffsetStart),
+      duration,
+    })
+  }, [playerName, startAt, lastOffsetStart, duration])
 
   useEffect(() => {
     const tonePlayer = new Player(audioFileUrl).toDestination()
@@ -40,20 +49,20 @@ export const AudioBlock: React.FC<IProps> = ({
 
     setPlayer(tonePlayer)
     setToneBuffer(toneBuffer)
-  }, [])
+  }, [audioFileUrl])
 
   useEffect(() => {
-    updatePlayerState(playerName, {
-      startAt,
-      offsetStart: Math.abs(lastOffsetStart),
-      duration,
-    })
-  }, [startAt, lastOffsetStart, duration])
+    memoizedUpdatePlayerState()
+  }, [
+    startAt,
+    lastOffsetStart,
+    duration,
+    memoizedUpdatePlayerState,
+    playerName,
+  ])
 
   function togglePlay() {
     if (!player) return
-    console.log('duration >>>', duration)
-    console.log('startAt >>>', startAt)
 
     return player.state === 'stopped'
       ? player.start(Math.round(startAt), Math.abs(lastOffsetStart), duration)
@@ -61,13 +70,10 @@ export const AudioBlock: React.FC<IProps> = ({
   }
 
   const handleResize: RndResizeCallback = (e, direction, ref, delta) => {
-    if (direction === 'left') {
+    if (direction === 'left')
       setOffsetStart(lastOffsetStart + convertPixelsToSeconds(delta.width))
-    }
-
-    if (direction === 'right') {
+    if (direction === 'right')
       setOffsetEnd(lastOffsetEnd + convertPixelsToSeconds(delta.width))
-    }
   }
 
   const handleResizeStop: RndResizeCallback = (
@@ -91,17 +97,15 @@ export const AudioBlock: React.FC<IProps> = ({
     setStartAt(convertPixelsToSeconds(data.x))
   }
 
-  return player ? (
-    <div style={{ display: 'flex' }}>
-      <button disabled={!player.loaded} onClick={() => togglePlay()}>
+  return player && toneBuffer ? (
+    <div className="audio-block-container">
+      <Button disabled={!player.loaded} onClick={() => togglePlay()}>
         {player.state === 'stopped' ? `Play` : `Stop`}
-      </button>
+      </Button>
       <div className="audio-block">
-        <div className="label">{children + seconds}</div>
+        <div className="label">{children}</div>
         <Rnd
-          width={`${
-            toneBuffer && convertSecondsToPixels(toneBuffer!.duration)
-          }px`}
+          width={`${convertSecondsToPixels(toneBuffer.duration)}px`}
           className="waveform-container"
           height="100px"
           bounds=".audio-block"
@@ -119,7 +123,7 @@ export const AudioBlock: React.FC<IProps> = ({
             <Waveform
               buffer={buffer}
               height={100}
-              width={toneBuffer && convertSecondsToPixels(toneBuffer.duration)}
+              width={convertSecondsToPixels(toneBuffer.duration)}
               className="react-waveform"
               position={0}
               color="#676767"
