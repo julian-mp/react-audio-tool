@@ -23,10 +23,10 @@ export const ReactAudioTool: React.FC<IProps> = ({ audioFileUrls }) => {
   >()
 
   function updatePlayerState(player: string, state: IPlayerState) {
-    setPlayerStates({
+    setPlayerStates((playerStates) => ({
       ...playerStates,
       [player]: state,
-    })
+    }))
   }
 
   const audioFilesConfig = Object.fromEntries(new Map(audioFileUrls))

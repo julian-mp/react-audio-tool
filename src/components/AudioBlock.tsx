@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Rnd, RndDragCallback, RndResizeCallback } from 'react-rnd'
 import { Buffer, Player, ToneAudioBuffer } from 'tone'
 import Waveform from 'waveform-react'
@@ -33,13 +33,13 @@ export const AudioBlock: React.FC<IProps> = ({
     ? buffer.duration + lastOffsetEnd + lastOffsetStart
     : 0
 
-  const memoizedUpdatePlayerState = useCallback(() => {
+  useEffect(() => {
     updatePlayerState(playerName, {
       startAt,
       offsetStart: Math.abs(lastOffsetStart),
       duration,
     })
-  }, [playerName, startAt, lastOffsetStart, duration])
+  }, [startAt, lastOffsetStart, duration])
 
   useEffect(() => {
     const tonePlayer = new Player(audioFileUrl).toDestination()
@@ -50,16 +50,6 @@ export const AudioBlock: React.FC<IProps> = ({
     setPlayer(tonePlayer)
     setToneBuffer(toneBuffer)
   }, [audioFileUrl])
-
-  useEffect(() => {
-    memoizedUpdatePlayerState()
-  }, [
-    startAt,
-    lastOffsetStart,
-    duration,
-    memoizedUpdatePlayerState,
-    playerName,
-  ])
 
   function togglePlay() {
     if (!player) return
