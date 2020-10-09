@@ -7,7 +7,7 @@
 
 # Example
 
-![react-audio-tool](https://github.com/julian-aimusic/react-audio-tool/example.gif)
+![react-audio-tool](https://github.com/julian-aimusic/react-audio-tool/raw/master/example.gif)
 
 # To-do
 
