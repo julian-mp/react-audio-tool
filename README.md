@@ -5,6 +5,10 @@
 1. `yarn`
 2. `yarn start`
 
+# Example
+
+![react-audio-tool](https://github.com/julian-aimusic/react-audio-tool/example.gif)
+
 # To-do
 
 1. Fix play all/stop all button
